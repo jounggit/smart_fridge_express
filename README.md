@@ -184,6 +184,52 @@ npx tailwindcss init -p
 
 프론트엔드 구현 가이드는 별도로 제공됩니다.
 
+## 🔐 관리자 페이지 (EJS)
+
+관리자 페이지는 EJS 템플릿 엔진을 사용하여 서버 사이드 렌더링(SSR)으로 구현되었습니다.
+
+### 접속 방법
+
+1. **관리자 계정 생성** (최초 1회만 실행)
+   ```
+   http://localhost:3001/admin/setup
+   ```
+
+2. **관리자 로그인**
+   ```
+   URL: http://localhost:3001/admin/login
+   아이디: admin
+   비밀번호: admin123
+   ```
+
+### 관리자 기능
+
+| 페이지 | URL | 설명 |
+|--------|-----|------|
+| 로그인 | `/admin/login` | 관리자 로그인 |
+| 대시보드 | `/admin/dashboard` | 전체 통계 (사용자, 냉장고, 식품 수) |
+| 사용자 관리 | `/admin/users` | 사용자 목록 조회/삭제 |
+| 냉장고 관리 | `/admin/fridges` | 냉장고 목록 조회 |
+| 냉장고 상세 | `/admin/fridges/:id` | 냉장고 내 식품 목록 조회 |
+
+### 관리자 파일 구조
+```
+backend/src/
+├── models/Admin.js           # 관리자 모델
+├── middleware/adminAuth.js   # 세션 인증 미들웨어
+├── routes/admin.js           # 관리자 라우트
+└── views/admin/              # EJS 템플릿
+    ├── login.ejs             # 로그인 페이지
+    ├── dashboard.ejs         # 대시보드
+    ├── users.ejs             # 사용자 관리
+    ├── fridges.ejs           # 냉장고 목록
+    └── fridge-detail.ejs     # 냉장고 상세 (식품 목록)
+```
+
+### 기술 스택 (관리자)
+- **EJS** - 템플릿 엔진 (서버 사이드 렌더링)
+- **express-session** - 세션 기반 인증
+
 ## 🔥 현재 상태
 
 ✅ **완료:**
@@ -196,13 +242,11 @@ npx tailwindcss init -p
 - 이미지 업로드 API
 - 유통기한 알림 API
 - 에러 핸들링
+- React + Vite 프론트엔드
+- 관리자 페이지 (EJS)
 
 ⏳ **진행 예정:**
-- React + Vite 프론트엔드
-- API 클라이언트 설정
-- 인증 Context
-- UI 컴포넌트
-- 페이지 라우팅
+- 추가 기능 개선
 
 ## 📌 중요 사항
 

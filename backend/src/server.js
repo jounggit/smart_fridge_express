@@ -1,6 +1,8 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const session = require('express-session');
+const path = require('path');
 const connectDB = require('./config/database');
 const errorHandler = require('./middleware/error');
 
@@ -10,6 +12,10 @@ const app = express();
 // 데이터베이스 연결
 connectDB();
 
+// EJS 뷰 엔진 설정
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+
 // 미들웨어
 app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:5173',
@@ -18,10 +24,24 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// 세션 설정 (관리자용)
+app.use(session({
+  secret: process.env.JWT_SECRET || 'admin-secret-key',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: false,
+    maxAge: 24 * 60 * 60 * 1000 // 24시간
+  }
+}));
+
 // 정적 파일 제공 (업로드된 이미지)
 app.use('/uploads', express.static('uploads'));
 
-// 라우트
+// 관리자 라우트 (EJS)
+app.use('/admin', require('./routes/admin'));
+
+// API 라우트
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/fridges', require('./routes/fridges'));
 app.use('/api/items', require('./routes/items'));
