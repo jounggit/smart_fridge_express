@@ -41,15 +41,13 @@ const itemSchema = new mongoose.Schema(
       trim: true,
     },
     position: {
-      shelf: {
+      x: {
         type: Number,
-        min: 1,
-        max: 10,
+        default: 0,
       },
-      column: {
+      y: {
         type: Number,
-        min: 1,
-        max: 10,
+        default: 0,
       },
     },
     notificationSent: {

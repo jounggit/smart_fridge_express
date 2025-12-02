@@ -65,12 +65,15 @@ export default function Layout({ children }: LayoutProps) {
       {/* Desktop Sidebar Navigation */}
       <div className="hidden md:block fixed left-0 top-0 bottom-0 w-64 bg-white border-r border-gray-200 z-50">
         <div className="p-6">
-          <div className="flex items-center gap-3 mb-8">
+          <button
+            onClick={() => navigate('/dashboard')}
+            className="flex items-center gap-3 mb-8 hover:opacity-80 transition-opacity"
+          >
             <div className="text-4xl">🧊</div>
             <div>
               <h2 className="text-xl font-bold text-gray-900">스마트 냉장고</h2>
             </div>
-          </div>
+          </button>
 
           <div className="space-y-2">
             {navItems.map((item) => {
