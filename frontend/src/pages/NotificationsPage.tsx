@@ -16,7 +16,11 @@ interface NotificationItem {
   name: string;
   category: ItemCategory;
   expirationDate: string;
-  fridgeId: string;
+  fridgeId: {
+    _id: string;
+    name: string;
+    icon: string;
+  };
   imageUrl?: string;
 }
 
@@ -105,7 +109,7 @@ export default function NotificationsPage() {
                     <div
                       key={item._id}
                       className="bg-white rounded-xl shadow-sm p-4 border-l-4 border-red-600 hover:shadow-md transition-shadow cursor-pointer"
-                      onClick={() => navigate(`/fridge/${item.fridgeId}`)}
+                      onClick={() => navigate(`/fridge/${item.fridgeId._id}`)}
                     >
                       <div className="flex gap-4">
                         {item.imageUrl && (
@@ -116,6 +120,11 @@ export default function NotificationsPage() {
                           />
                         )}
                         <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-sm text-gray-500">
+                              {item.fridgeId.icon} {item.fridgeId.name}
+                            </span>
+                          </div>
                           <div className="flex items-center gap-2 mb-2">
                             <span className="text-2xl">
                               {getCategoryIcon(item.category)}
@@ -156,7 +165,7 @@ export default function NotificationsPage() {
                     <div
                       key={item._id}
                       className="bg-white rounded-xl shadow-sm p-4 border-l-4 border-orange-600 hover:shadow-md transition-shadow cursor-pointer"
-                      onClick={() => navigate(`/fridge/${item.fridgeId}`)}
+                      onClick={() => navigate(`/fridge/${item.fridgeId._id}`)}
                     >
                       <div className="flex gap-4">
                         {item.imageUrl && (
@@ -167,6 +176,11 @@ export default function NotificationsPage() {
                           />
                         )}
                         <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-sm text-gray-500">
+                              {item.fridgeId.icon} {item.fridgeId.name}
+                            </span>
+                          </div>
                           <div className="flex items-center gap-2 mb-2">
                             <span className="text-2xl">
                               {getCategoryIcon(item.category)}

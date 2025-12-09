@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { fridgesAPI, itemsAPI, uploadAPI } from '../lib/api';
-import { ArrowLeft, Plus, Trash2, Upload, X, Snowflake, Move } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Upload, X, Snowflake, Move, MoreVertical } from 'lucide-react';
 import { toast } from 'react-toastify';
 import {
   getCategoryIcon,
@@ -395,9 +395,15 @@ export default function FridgeDetailPage() {
                   {items.length}개의 물품
                 </span>
               </div>
-              <div className="flex items-center gap-1 text-slate-400 text-sm">
-                <Move className="w-4 h-4" />
-                <span>드래그하여 이동</span>
+              <div className="flex items-center gap-3 text-slate-400 text-sm">
+                <span className="flex items-center gap-1">
+                  <Move className="w-4 h-4" />
+                  드래그하여 이동
+                </span>
+                <span className="flex items-center gap-1">
+                  <MoreVertical className="w-4 h-4" />
+                  상세 보기
+                </span>
               </div>
             </div>
             <button
@@ -503,12 +509,6 @@ export default function FridgeDetailPage() {
                               ? '0 20px 40px rgba(0,0,0,0.3)'
                               : '0 4px 12px rgba(0,0,0,0.15)'
                           }}
-                          onClick={(e) => {
-                            if (!isDragging) {
-                              e.stopPropagation();
-                              setSelectedItem(item);
-                            }
-                          }}
                         >
                           {/* 아이템 이미지 또는 아이콘 */}
                           {item.imageUrl ? (
@@ -530,6 +530,20 @@ export default function FridgeDetailPage() {
                               {item.name}
                             </p>
                           </div>
+
+                          {/* 점 세개 메뉴 버튼 */}
+                          <button
+                            className="absolute top-1 left-1 w-5 h-5 bg-white/90 rounded-full shadow flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white cursor-pointer z-10"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setSelectedItem(item);
+                            }}
+                            onMouseDown={(e) => e.stopPropagation()}
+                            onTouchStart={(e) => e.stopPropagation()}
+                          >
+                            <MoreVertical className="w-3 h-3 text-slate-600" />
+                          </button>
 
                           {/* 유통기한 경고 표시 */}
                           {expStatus.status !== 'fresh' && (

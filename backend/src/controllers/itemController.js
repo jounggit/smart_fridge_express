@@ -130,7 +130,9 @@ exports.getExpiringItems = async (req, res, next) => {
         $gte: now,
         $lte: futureDate,
       },
-    }).sort({ expirationDate: 1 });
+    })
+      .populate('fridgeId', 'name icon')
+      .sort({ expirationDate: 1 });
 
     // 유통기한 만료 물품 (오늘 이전)
     const expiredItems = await Item.find({
@@ -138,7 +140,9 @@ exports.getExpiringItems = async (req, res, next) => {
       expirationDate: {
         $lt: now,
       },
-    }).sort({ expirationDate: -1 });
+    })
+      .populate('fridgeId', 'name icon')
+      .sort({ expirationDate: -1 });
 
     res.json({
       expiringItems,

@@ -1,8 +1,8 @@
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 const express = require('express');
 const cors = require('cors');
 const session = require('express-session');
-const path = require('path');
 const connectDB = require('./config/database');
 const errorHandler = require('./middleware/error');
 
@@ -61,7 +61,7 @@ app.use((req, res) => {
 app.use(errorHandler);
 
 // 서버 시작
-const PORT = process.env.PORT || 3001;
+const PORT = 3001;
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on port ${PORT}`);
   console.log(`📡 Frontend URL: ${process.env.FRONTEND_URL}`);

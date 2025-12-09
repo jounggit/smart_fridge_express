@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run dev:*)",
+      "Bash(powershell -Command \"cd ''c:\\smart_fridge\\smart_fridge_express\\backend''; npm run dev\")",
+      "Bash(powershell -Command \"cd ''c:\\smart_fridge\\smart_fridge_express\\frontend''; npm run dev\")",
+      "Bash(powershell -Command \"cd ''c:\\smart_fridge\\smart_fridge_express\\backend''; npm install\")",
+      "Bash(powershell -Command \"cd ''c:\\smart_fridge\\smart_fridge_express\\frontend''; npm install\")",
+      "Bash(powershell -Command \"cd ''c:\\smart_fridge\\smart_fridge_express\\frontend''; npx vite\")",
+      "Bash(powershell -Command \"cd ''c:\\smart_fridge\\smart_fridge_express\\frontend''; Remove-Item -Recurse -Force node_modules -ErrorAction SilentlyContinue; npm install\")",
+      "Bash(powershell -Command \"cd ''c:\\smart_fridge\\smart_fridge_express\\frontend''; npm install --include=dev\")",
+      "Bash(powershell -Command \"netstat -ano | Select-String '':3001''\")",
+      "Bash(powershell -Command \"Set-Location ''c:\\smart_fridge\\smart_fridge_express\\backend''; $env:PORT=''3001''; npm run dev\")",
+      "Bash(powershell -Command \"Get-Process node -ErrorAction SilentlyContinue | Stop-Process -Force\")",
+      "Bash(powershell -Command:*)"
+    ]
+  }
+}
