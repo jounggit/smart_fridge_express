@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { fridgesAPI, itemsAPI, uploadAPI } from '../lib/api';
-import { ArrowLeft, Plus, Trash2, Upload, X, Snowflake, Move, MoreVertical } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Upload, X, Snowflake, Move, MoreVertical, Pencil } from 'lucide-react';
 import { toast } from 'react-toastify';
 import {
   getCategoryIcon,
@@ -117,6 +117,19 @@ export default function FridgeDetailPage() {
     memo: '',
     imageUrl: '',
   });
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editItem, setEditItem] = useState({
+    _id: '',
+    name: '',
+    category: '채소' as ItemCategory,
+    quantity: 1,
+    unit: '개',
+    expirationDate: '',
+    purchaseDate: '',
+    memo: '',
+    imageUrl: '',
+  });
+  const [editImagePreview, setEditImagePreview] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
     if (!id) return;
@@ -336,6 +349,79 @@ export default function FridgeDetailPage() {
       navigate('/dashboard');
     } catch (error: any) {
       toast.error('냉장고 삭제에 실패했습니다');
+    }
+  };
+
+  const handleOpenEditModal = (item: Item) => {
+    setEditItem({
+      _id: item._id,
+      name: item.name,
+      category: item.category,
+      quantity: item.quantity,
+      unit: item.unit,
+      expirationDate: item.expirationDate.split('T')[0],
+      purchaseDate: item.purchaseDate.split('T')[0],
+      memo: item.memo || '',
+      imageUrl: item.imageUrl || '',
+    });
+    setEditImagePreview(item.imageUrl ? `http://localhost:3001${item.imageUrl}` : null);
+    setSelectedItem(null);
+    setShowEditModal(true);
+  };
+
+  const handleEditImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('파일 크기는 5MB를 초과할 수 없습니다');
+      return;
+    }
+
+    if (!['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(file.type)) {
+      toast.error('지원되는 이미지 형식이 아닙니다');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setEditImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+
+    setUploadingImage(true);
+    try {
+      const response = await uploadAPI.uploadImage(file);
+      setEditItem({ ...editItem, imageUrl: response.data.imageUrl });
+      toast.success('이미지가 업로드되었습니다');
+    } catch (error: any) {
+      toast.error('이미지 업로드에 실패했습니다');
+      setEditImagePreview(editItem.imageUrl ? `http://localhost:3001${editItem.imageUrl}` : null);
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const handleUpdateItem = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      await itemsAPI.update(editItem._id, {
+        name: editItem.name,
+        category: editItem.category,
+        quantity: editItem.quantity,
+        unit: editItem.unit,
+        expirationDate: editItem.expirationDate,
+        purchaseDate: editItem.purchaseDate,
+        memo: editItem.memo,
+        imageUrl: editItem.imageUrl,
+      });
+      toast.success('물품이 수정되었습니다');
+      setShowEditModal(false);
+      setEditImagePreview(null);
+      fetchData();
+    } catch (error: any) {
+      toast.error('물품 수정에 실패했습니다');
     }
   };
 
@@ -664,6 +750,13 @@ export default function FridgeDetailPage() {
                 닫기
               </button>
               <button
+                onClick={() => handleOpenEditModal(selectedItem)}
+                className="flex-1 py-3 bg-cyan-500 text-white rounded-xl hover:bg-cyan-600 transition-colors font-medium flex items-center justify-center gap-2"
+              >
+                <Pencil className="w-4 h-4" />
+                수정
+              </button>
+              <button
                 onClick={() => handleDeleteItem(selectedItem._id)}
                 className="flex-1 py-3 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-colors font-medium flex items-center justify-center gap-2"
               >
@@ -671,6 +764,179 @@ export default function FridgeDetailPage() {
                 삭제
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Item Modal */}
+      {showEditModal && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-[300] overflow-y-auto">
+          <div className="bg-white rounded-2xl p-6 max-w-2xl w-full my-8 shadow-2xl">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">물품 수정</h2>
+            <form onSubmit={handleUpdateItem} className="space-y-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    물품명 *
+                  </label>
+                  <input
+                    type="text"
+                    value={editItem.name}
+                    onChange={(e) => setEditItem({ ...editItem, name: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
+                    placeholder="예: 우유"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    카테고리 *
+                  </label>
+                  <select
+                    value={editItem.category}
+                    onChange={(e) => setEditItem({ ...editItem, category: e.target.value as ItemCategory })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
+                  >
+                    {categories.map((cat) => (
+                      <option key={cat} value={cat}>
+                        {getCategoryIcon(cat)} {cat}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    수량 *
+                  </label>
+                  <input
+                    type="number"
+                    value={editItem.quantity}
+                    onChange={(e) => setEditItem({ ...editItem, quantity: parseInt(e.target.value) })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
+                    min="1"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    단위 *
+                  </label>
+                  <input
+                    type="text"
+                    value={editItem.unit}
+                    onChange={(e) => setEditItem({ ...editItem, unit: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
+                    placeholder="개, 병, kg 등"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    유통기한 *
+                  </label>
+                  <input
+                    type="date"
+                    value={editItem.expirationDate}
+                    onChange={(e) => setEditItem({ ...editItem, expirationDate: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    구매일
+                  </label>
+                  <input
+                    type="date"
+                    value={editItem.purchaseDate}
+                    onChange={(e) => setEditItem({ ...editItem, purchaseDate: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  메모
+                </label>
+                <textarea
+                  value={editItem.memo}
+                  onChange={(e) => setEditItem({ ...editItem, memo: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
+                  rows={3}
+                  placeholder="추가 정보를 입력하세요"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  이미지
+                </label>
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+                  {editImagePreview ? (
+                    <div className="relative">
+                      <img
+                        src={editImagePreview}
+                        alt="Preview"
+                        className="w-full h-48 object-cover rounded-lg"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditImagePreview(null);
+                          setEditItem({ ...editItem, imageUrl: '' });
+                        }}
+                        className="absolute top-2 right-2 p-1 bg-red-600 text-white rounded-full hover:bg-red-700"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <label className="flex flex-col items-center justify-center cursor-pointer">
+                      <Upload className="w-8 h-8 text-gray-400 mb-2" />
+                      <span className="text-sm text-gray-600">
+                        {uploadingImage ? '업로드 중...' : '이미지 업로드'}
+                      </span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleEditImageUpload}
+                        className="hidden"
+                        disabled={uploadingImage}
+                      />
+                    </label>
+                  )}
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  최대 5MB, JPG/PNG/GIF/WebP
+                </p>
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowEditModal(false);
+                    setEditImagePreview(null);
+                  }}
+                  className="flex-1 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  취소
+                </button>
+                <button
+                  type="submit"
+                  disabled={uploadingImage}
+                  className="flex-1 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-500 transition-colors disabled:bg-gray-400"
+                >
+                  수정 완료
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

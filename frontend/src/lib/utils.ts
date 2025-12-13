@@ -46,7 +46,7 @@ export function getCategoryColor(category: ItemCategory): string {
   return colors[category] || 'bg-gray-100 text-gray-800 border-gray-200';
 }
 
-export type ExpirationStatus = 'expired' | 'expiring-soon' | 'fresh';
+export type ExpirationStatus = 'expired' | 'warning' | 'fresh';
 
 export function getExpirationStatus(expirationDate: string | Date): {
   status: ExpirationStatus;
@@ -72,7 +72,7 @@ export function getExpirationStatus(expirationDate: string | Date): {
     };
   } else if (daysLeft <= 3) {
     return {
-      status: 'expiring-soon',
+      status: 'warning',
       daysLeft,
       color: 'text-orange-600',
       bgColor: 'bg-orange-50 border-orange-200',
